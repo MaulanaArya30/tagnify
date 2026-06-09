@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tagnify"
+version = "0.1.0"
+description = "LLM-powered automated data labeling with schema-first, confidence-scored, and local-model ready"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Maulana Arya Alambana", email = "maulanaaryaw@gmail.com" }
+]
+keywords = ["llm", "data-labeling", "nlp", "annotation", "machine-learning"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "pydantic>=2.0",
+    "httpx>=0.24",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+]
+
+[project.urls]
+#Homepage = "https://tagnify.io"
+#Repository = "https://github.com/maulana/tagnify"
+#Documentation = "https://docs.tagnify.io"
+
+[tool.hatch.build.targets.wheel]
+# This is the critical line:
+# tells hatchling to ship sdk/tagnify/ as the package,
+# NOT the entire sdk/ folder
+packages = ["tagnify"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
