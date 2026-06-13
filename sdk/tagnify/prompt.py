@@ -30,9 +30,9 @@ class PromptBuilder:
         """
         sections = [
             self._header(schema),
-            self._example(schema, reasoning),
+            self._examples(schema, reasoning),
             self._item(text),
-            self._format_instructions(schema, reasoning),
+            self._format_instruction(schema, reasoning),
         ]
         if attempt > 1:
             sections.append(self._retry_reminder(attempt))

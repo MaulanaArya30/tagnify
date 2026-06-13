@@ -218,7 +218,7 @@ class TestOllamaBackendErrors:
 
         with patch("tagnify.backends.ollama.httpx.Client", return_value=mock_client):
             backend = OllamaBackend(model="qwen2.5:7b")
-            with pytest.raises(BackendError, match="timed out"):
+            with pytest.raises(BackendError, match="timeout"):
                 backend.complete("prompt")
 
     def test_http_error_raises_backend_error(self):
