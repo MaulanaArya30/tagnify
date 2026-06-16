@@ -7,7 +7,7 @@ from tagnify.schema import Schema, LabelResult
 
 
 
-class TagnifyClient:
+class Tagnify:
     """Main tagnify client class"""
     def __init__(
         self,
