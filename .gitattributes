@@ -1,0 +1,193 @@
+# =============================================================
+# Tagnify — .gitattributes
+#
+# Controls how Git handles line endings and binary files across
+# Windows / macOS / Linux.
+#
+# Rule: ALL text files are stored with LF in the repository.
+#       On checkout, everyone gets LF — including Windows.
+#
+# Why not CRLF for Windows?
+#   - Python does not care about line endings
+#   - Shell scripts BREAK with CRLF on Linux/macOS
+#   - Docker containers run on Linux and need LF
+#   - Consistent LF everywhere eliminates the warnings you saw
+#
+# IMPORTANT: .gitattributes does NOT support inline comments.
+# All comments must be on their own line starting with #.
+# =============================================================
+
+
+# -------------------------------------------------------------
+# Default: normalise all unspecified text files to LF
+# -------------------------------------------------------------
+
+* text=auto eol=lf
+
+
+# -------------------------------------------------------------
+# Python
+# sdk/ and api/
+# -------------------------------------------------------------
+
+*.py    text eol=lf
+*.pyi   text eol=lf
+
+
+# -------------------------------------------------------------
+# Configuration and packaging
+# -------------------------------------------------------------
+
+*.toml  text eol=lf
+*.cfg   text eol=lf
+*.ini   text eol=lf
+*.txt   text eol=lf
+*.md    text eol=lf
+*.rst   text eol=lf
+*.yaml  text eol=lf
+*.yml   text eol=lf
+
+
+# -------------------------------------------------------------
+# Docker
+# api/ containerisation — must be LF, runs on Linux
+# -------------------------------------------------------------
+
+Dockerfile      text eol=lf
+Dockerfile.*    text eol=lf
+*.dockerfile    text eol=lf
+.dockerignore   text eol=lf
+
+
+# -------------------------------------------------------------
+# Web / dashboard
+# dashboard/
+# -------------------------------------------------------------
+
+*.js    text eol=lf
+*.jsx   text eol=lf
+*.ts    text eol=lf
+*.tsx   text eol=lf
+*.css   text eol=lf
+*.scss  text eol=lf
+*.sass  text eol=lf
+*.html  text eol=lf
+*.htm   text eol=lf
+*.json  text eol=lf
+*.mjs   text eol=lf
+*.cjs   text eol=lf
+
+
+# -------------------------------------------------------------
+# Database and migrations
+# api/ Phase 2+
+# -------------------------------------------------------------
+
+*.sql       text eol=lf
+*.prisma    text eol=lf
+
+
+# -------------------------------------------------------------
+# Shell scripts
+# Must always be LF — CRLF breaks them on Linux/macOS
+# -------------------------------------------------------------
+
+*.sh    text eol=lf
+*.bash  text eol=lf
+*.zsh   text eol=lf
+*.fish  text eol=lf
+
+
+# -------------------------------------------------------------
+# Windows-specific scripts
+# Need CRLF to run correctly on Windows CMD / PowerShell
+# -------------------------------------------------------------
+
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+*.ps1   text eol=crlf
+
+
+# -------------------------------------------------------------
+# Environment file templates
+# The real .env is gitignored — only templates are committed
+# -------------------------------------------------------------
+
+.env.example    text eol=lf
+.env.template   text eol=lf
+
+
+# -------------------------------------------------------------
+# CI / GitHub Actions workflows
+# Already covered by *.yml above — listed explicitly for clarity
+# -------------------------------------------------------------
+
+.github/workflows/*.yml text eol=lf
+
+
+# -------------------------------------------------------------
+# SVG — XML/text format, not binary
+# Mark as text so Git shows meaningful diffs
+# -------------------------------------------------------------
+
+*.svg   text eol=lf
+
+
+# -------------------------------------------------------------
+# Binary files
+# No line ending conversion — Git would corrupt these
+# -------------------------------------------------------------
+
+# Images
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.avif  binary
+*.tiff  binary
+*.bmp   binary
+
+# Fonts
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+*.eot   binary
+
+# Archives and compiled output
+*.zip   binary
+*.tar   binary
+*.gz    binary
+*.bz2   binary
+*.xz    binary
+*.7z    binary
+*.rar   binary
+*.whl   binary
+*.pyc   binary
+*.pyd   binary
+*.so    binary
+*.dll   binary
+*.exe   binary
+
+# Documents
+*.pdf   binary
+*.doc   binary
+*.docx  binary
+*.xls   binary
+*.xlsx  binary
+
+# Database files
+*.db        binary
+*.sqlite    binary
+*.sqlite3   binary
+
+# Certificates and keys
+# Also gitignored, but marked binary as a second line of defence
+*.pem   binary
+*.p12   binary
+*.pfx   binary
+*.key   binary
+*.crt   binary
+*.cer   binary
