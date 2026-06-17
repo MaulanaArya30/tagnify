@@ -475,6 +475,6 @@ MIT — see [LICENSE](LICENSE).
 
 ## About
 
-Tagnify was built by [Maulana Arya Alambana](https://github.com/MaulanaArya30), a CS student at Gadjah Mada University and Data Scientist Intern at GoTo Group. The retry logic, mandatory few-shot examples, and confidence flagging were extracted from a real LLM labeling pipeline built in production — this isn't a greenfield project.
+Tagnify was built by [Maulana Arya Alambana](https://github.com/MaulanaArya30). The retry logic, mandatory few-shot examples, and confidence flagging were extracted from a real LLM labeling pipeline built in production — this isn't a greenfield project.
 
 *Production experience → open-source tool → commercial product. That's the arc.*
