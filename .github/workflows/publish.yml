@@ -1,0 +1,46 @@
+name: Publish to PyPI
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  test-then-publish:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: pypi
+      url: https://pypi.org/p/tagnify
+
+    permissions:
+      id-token: write  # Required for Trusted Publishing (OIDC)
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        working-directory: sdk
+        run: pip install -e ".[dev]"
+
+      - name: Run tests before publishing
+        working-directory: sdk
+        run: pytest tests/ -v
+
+      - name: Install build tools
+        run: pip install build
+
+      - name: Build package
+        working-directory: sdk
+        run: python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: sdk/dist/
