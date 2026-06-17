@@ -144,3 +144,82 @@ class TestClientLabelBatch:
         client, _ = make_tagnify_with_mock([])
         results = client.label_batch([], make_schema())
         assert results == []
+
+
+# ═══════════════════════════════════════════════════════════════
+# with_backend() — custom backend support
+# ═══════════════════════════════════════════════════════════════
+
+class TestClientWithBackend:
+
+    def test_returns_tagnify_instance(self):
+        """with_backend() must return an actual Tagnify, not something else."""
+        backend = MockBackend([VALID_RESPONSE])
+        client = Tagnify.with_backend(backend)
+        assert isinstance(client, Tagnify)
+
+    def test_uses_the_exact_backend_provided(self):
+        """The client must hold a reference to the same backend instance —
+        not a copy, not a rebuilt equivalent."""
+        backend = MockBackend([VALID_RESPONSE])
+        client = Tagnify.with_backend(backend)
+        assert client._backend is backend
+
+    def test_creates_a_labeling_engine(self):
+        backend = MockBackend([VALID_RESPONSE])
+        client = Tagnify.with_backend(backend)
+        assert isinstance(client._engine, LabelEngine)
+
+    def test_label_works_end_to_end_with_custom_backend(self):
+        """The whole point: label() must work identically to the
+        built-in backends once wired through with_backend()."""
+        backend = MockBackend([VALID_RESPONSE])
+        client = Tagnify.with_backend(backend)
+        result = client.label("Great product!", make_schema())
+        assert result.success is True
+        assert result.label == "positive"
+
+    def test_label_batch_works_with_custom_backend(self):
+        backend = MockBackend([VALID_RESPONSE, VALID_RESPONSE])
+        client = Tagnify.with_backend(backend)
+        results = client.label_batch(["a", "b"], make_schema())
+        assert len(results) == 2
+        assert all(r.success for r in results)
+
+    def test_custom_max_retries_is_respected(self):
+        """max_retries on with_backend() should reach the engine,
+        same as it does via the normal __init__ path."""
+        backend = MockBackend([BAD_RESPONSE, BAD_RESPONSE])
+        client = Tagnify.with_backend(backend, max_retries=2)
+        result = client.label("test", make_schema())
+        assert result.attempts == 2
+        assert backend.call_count == 2
+
+    def test_default_max_retries_is_three(self):
+        backend = MockBackend([BAD_RESPONSE, BAD_RESPONSE, BAD_RESPONSE])
+        client = Tagnify.with_backend(backend)
+        result = client.label("test", make_schema())
+        assert result.attempts == 3
+
+    def test_rejects_non_basebackend_instance(self):
+        """Passing something that isn't a BaseBackend should fail loudly
+        and immediately — not silently break deep inside the engine later."""
+        class NotABackend:
+            def complete(self, prompt: str) -> str:
+                return VALID_RESPONSE
+
+        with pytest.raises(TypeError, match="BaseBackend instance"):
+            Tagnify.with_backend(NotABackend())
+
+    def test_rejects_plain_string(self):
+        with pytest.raises(TypeError, match="BaseBackend instance"):
+            Tagnify.with_backend("not a backend at all")
+
+    def test_rejects_none(self):
+        with pytest.raises(TypeError, match="BaseBackend instance"):
+            Tagnify.with_backend(None)
+
+    def test_error_message_includes_actual_type_received(self):
+        """Error should name the wrong type, for fast debugging."""
+        with pytest.raises(TypeError, match="str"):
+            Tagnify.with_backend("oops")

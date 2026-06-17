@@ -8,4 +8,4 @@ from tagnify.schema import Schema, Example, LabelResult
 from tagnify.client import Tagnify
 
 __all__ = ["Tagnify", "Schema", "Example", "LabelResult"]
-__version__ = "0.1.0"
+__version__ = "0.2.0"

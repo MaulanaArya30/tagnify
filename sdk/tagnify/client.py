@@ -30,6 +30,26 @@ class Tagnify:
             max_retries=max_retries,
         )
 
+    @classmethod
+    def with_backend(
+        cls,
+        backend: BaseBackend,
+        max_retries: int = 3,
+    ) -> "Tagnify":
+        """Create a Tagnify client using a custom backend"""
+        if not isinstance(backend, BaseBackend):
+            raise TypeError(
+                f"with_backend() requires a BaseBackend instance, got "
+                f"{type(backend).__name__}. Subclass BaseBackend and "
+                f"implement complete(prompt: str) -> str to create a "
+                f"custom backend."
+            )
+
+        instance = cls.__new__(cls)
+        instance._backend = backend
+        instance._engine = LabelEngine(backend=backend, max_retries=max_retries)
+        return instance
+
     def _init_backend(
         self,
         model: str,
@@ -51,6 +71,7 @@ class Tagnify:
         raise NotImplementedError(
             "Cloud backend support (api_key) is coming soon. "
             "For now, use Tagnify without api_key to run locally with Ollama. "
+             "or Tagnify.with_backend() to use your own LLM API. "
         )
     
     def label(
