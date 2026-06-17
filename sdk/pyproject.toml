@@ -36,9 +36,7 @@ dev = [
 ]
 
 [project.urls]
-#Homepage = "https://tagnify.io"
-#Repository = "https://github.com/MaulanaArya30/tagnify-project"
-#Documentation = "https://docs.tagnify.io" "https://github.com/MaulanaArya30/tagnify-project/blob/main/README.md"
+#Repository = "https://github.com/MaulanaArya30/tagnify"
 
 [tool.hatch.build.targets.wheel]
 # This is the critical line:
