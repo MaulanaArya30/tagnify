@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tagnify"
-version = "0.1.0"
+version = "0.2.0"
 description = "LLM-powered automated data labeling with schema-first, confidence-scored, and local-model ready"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -36,9 +36,8 @@ dev = [
 ]
 
 [project.urls]
-#Homepage = "https://tagnify.io"
-#Repository = "https://github.com/maulana/tagnify"
-#Documentation = "https://docs.tagnify.io"
+Repository = "https://github.com/maulana/tagnify"
+Documentation = "https://github.com/MaulanaArya30/tagnify/blob/main/README.md"
 
 [tool.hatch.build.targets.wheel]
 # This is the critical line:

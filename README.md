@@ -2,7 +2,7 @@
 
 **LLM-powered automated data labeling. Schema-first. Confidence-scored. Local-model ready.**
 
-[![Tests](https://github.com/MaulanaArya30/tagnify-project/actions/workflows/test.yml/badge.svg)](https://github.com/MaulanaArya30/tagnify-project/actions/workflows/test.yml)
+[![Tests](https://github.com/MaulanaArya30/tagnify/actions/workflows/test.yml/badge.svg)](https://github.com/MaulanaArya30/tagnify/actions/workflows/test.yml)
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)](https://pypi.org/project/tagnify/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -55,6 +55,8 @@ Calling an LLM directly for labeling seems simple until production. Then you hit
 **Confidence scoring and flagging.** Every label comes with a confidence score. Results below your schema's threshold are automatically flagged for human review. You decide the threshold per schema.
 
 **Clean output parsing.** The `OutputParser` handles markdown fences, single quotes, trailing commas, surrounding text, and nested objects — the full range of what models actually return in the real world.
+
+**Pluggable backends.** Ollama isn't the only option. If you have your own LLM API — an internal company model, a provider Tagnify doesn't support yet — implement one method and plug it straight in. The retry logic, parsing, validation, and confidence scoring all work unchanged regardless of where the model's text comes from.
 
 ---
 
@@ -165,6 +167,43 @@ print(f"Failed:   {len(failures)}")   # will never crash the batch
 print(f"Flagged:  {len(flagged)}")    # needs human review
 ```
 
+### Custom backends (bring your own LLM)
+
+Have your own LLM API — an internal company model, a provider Tagnify doesn't support yet, anything that isn't Ollama? Implement `BaseBackend` and wire it in with `Tagnify.with_backend()`:
+
+```python
+from tagnify import Tagnify, Schema, Example
+from tagnify.backends.base import BaseBackend
+from tagnify.exceptions import BackendError
+import httpx
+
+class MyCompanyBackend(BaseBackend):
+    def __init__(self, endpoint: str, api_key: str, model: str):
+        self.endpoint = endpoint
+        self.api_key = api_key
+        self.model = model
+
+    def complete(self, prompt: str) -> str:
+        try:
+            response = httpx.post(
+                self.endpoint,
+                headers={"Authorization": f"Bearer {self.api_key}"},
+                json={"model": self.model, "prompt": prompt},
+                timeout=60.0,
+            )
+            response.raise_for_status()
+        except httpx.HTTPError as e:
+            raise BackendError(f"Backend call failed: {e}") from e
+        return response.json()["text"]
+
+backend = MyCompanyBackend(endpoint="...", api_key="...", model="...")
+tagnify = Tagnify.with_backend(backend)
+
+result = tagnify.label("This was a disappointing experience.", schema)
+```
+
+Everything downstream — retries, parsing, validation, confidence scoring, flagging — works identically to the built-in backends, because all of it operates on the string `complete()` returns, regardless of where that string came from. Wrap your own network/API errors in `BackendError` so the retry logic behaves correctly: it's treated as an infrastructure failure and is not retried, unlike a malformed model response, which is.
+
 ---
 
 ## API reference
@@ -271,6 +310,20 @@ result: LabelResult = tagnify.label(text, schema, reasoning=False)
 # Label a list of items — failures don't stop the batch
 results: list[LabelResult] = tagnify.label_batch(texts, schema, reasoning=False)
 ```
+
+**Alternate constructor — custom backends:**
+
+```python
+# Skip Ollama and the cloud API entirely — use any BaseBackend implementation
+tagnify = Tagnify.with_backend(my_backend, max_retries=3)
+```
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `backend` | `BaseBackend` | required | Any class implementing `complete(prompt: str) -> str`. |
+| `max_retries` | `int` | `3` | Same meaning as on the standard constructor. |
+
+Raises `TypeError` immediately if `backend` isn't a `BaseBackend` instance, rather than failing confusingly later inside the labeling pipeline.
 
 ---
 
@@ -379,6 +432,7 @@ Pull any model with `ollama pull <model-name>` before using it with Tagnify.
 - [x] Four-strategy output parsing cascade
 - [x] Retry logic with progressive prompt escalation
 - [x] Batch labeling
+- [x] `Tagnify.with_backend()` — plug in your own LLM API (internal models, unsupported providers)
 - [x] Full test suite (90+ tests)
 
 ### Phase 2 — Cloud API
@@ -434,8 +488,8 @@ tagnify/
 ## Development
 
 ```bash
-git clone https://github.com/MaulanaArya30/tagnify-project.git
-cd tagnify-project/sdk
+git clone https://github.com/MaulanaArya30/tagnify.git
+cd tagnify/sdk
 
 # Create a virtual environment
 python -m venv .venv
